@@ -9,9 +9,10 @@ connectDB();
 
 export async function POST(req: NextRequest) {
   try {
-    const { reqBody } = await req.json();
+    const { email , password} = await req.json();
 
-    const { email, password } = reqBody;
+    console.log(email)
+    console.log(password)
 
     const user = await User.findOne({
       email,
