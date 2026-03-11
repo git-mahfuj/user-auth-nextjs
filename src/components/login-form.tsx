@@ -1,35 +1,78 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [loggeduser, setLoggedUser] = useState({
+    email: "",
+    password: "",
+  });
+  
+  const [btnDisabled, setBtnDisabled] = useState(false);
+  const router = useRouter()
+  useEffect(() => {
+    if (loggeduser.email === "" && loggeduser.password === "") {
+      console.log("No Logged User");
+      setBtnDisabled(true);
+    } else {
+      setBtnDisabled(false);
+    }
+  }, [loggeduser]);
+
+  const handleLoginInput = async (e: any) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("/api/login", loggeduser, {});
+      if (response) {
+        toast.success("User Logged In Succesfully");
+        console.log(loggeduser);
+        router.push("/users/home")
+      } else {
+        toast.error("Failed While Login User");
+      }
+
+      return;
+    } catch (error: any) {
+      console.log(error.message);
+      toast.error(error.message);
+    }
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="font-semibold text-center font-serif">Login to your account</CardTitle>
+          <CardTitle className="font-semibold text-center font-serif">
+            Login to your account
+          </CardTitle>
           <CardDescription>
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleLoginInput}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -38,6 +81,13 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  value={loggeduser.email}
+                  onChange={(e) =>
+                    setLoggedUser({
+                      ...loggeduser,
+                      email: e.currentTarget.value,
+                    })
+                  }
                 />
               </Field>
               <Field>
@@ -50,10 +100,23 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={loggeduser.password}
+                  onChange={(e) =>
+                    setLoggedUser({
+                      ...loggeduser,
+                      password: e.currentTarget.value,
+                    })
+                  }
+                />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={btnDisabled}>
+                  Login
+                </Button>
                 <Button variant="outline" type="button">
                   Login with Google
                 </Button>
@@ -66,5 +129,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

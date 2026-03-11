@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { cn } from "@/lib/utils";
@@ -30,17 +31,27 @@ export function SignupForm({
     password: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
-
-
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   const router = useRouter();
-  const handleInput = async (e: any, ) => {
+  useEffect(() => {
+    if (user.name === "" && user.email === "" && user.password === "") {
+      setButtonDisabled(true);
+      console.log("No user");
+    } else {
+      setButtonDisabled(false);
+    }
+  }, [user]);
+  const handleSignInInput = async (e: any) => {
     e.preventDefault();
     try {
-      const response = await axios.post("api/signup", user, {});
+      if (user.name === "" && user.email === "" && user.password === "") {
+        toast.error("Fill All Field");
+      }
+      const response = await axios.post("/api/signup", user, {});
       if (response) {
         toast.success("User Created Succesfully");
         console.log(user);
-        router.push("/login");
+        router.push("/users/login");
       } else {
         toast.error("Failed While Creating User");
       }
@@ -61,7 +72,7 @@ export function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleInput}>
+          <form onSubmit={handleSignInInput}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
@@ -109,7 +120,9 @@ export function SignupForm({
                 </FieldDescription>
               </Field>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit" disabled={buttonDisabled}>
+                  Create Account
+                </Button>
                 <FieldDescription className="text-center">
                   Already have an account? <a href="#">Sign in</a>
                 </FieldDescription>
