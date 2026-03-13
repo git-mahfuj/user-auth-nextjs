@@ -49,7 +49,7 @@ export function LoginForm({
       if (response) {
         toast.success("User Logged In Succesfully");
         console.log(loggeduser);
-        router.push("/users/home")
+        router.push("/users/profile")
       } else {
         toast.error("Failed While Login User");
       }
